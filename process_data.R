@@ -1,5 +1,7 @@
+# This script primarily puts all of the datasets into (country, year) row ordering.
+
 # Get XLSX package.
-install.packages('openxlsx')
+# install.packages('openxlsx') # Uncomment this to install the package.
 library('openxlsx')
 
 PROCESSED_DATA_DIR = './data/processed/'
