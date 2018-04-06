@@ -4,8 +4,11 @@
 # install.packages('openxlsx') # Uncomment this to install the package.
 library('openxlsx')
 
-PROCESSED_DATA_DIR = './data/processed/'
-ORIGINAL_DATA_DIR = './data/original/'
+# MAKE SURE CURRENT WORKING DIRECTORY IS SET TO THIS FILE!
+PROCESSED_DATA_DIR = '../data/processed/'
+ORIGINAL_DATA_DIR = '../data/original/'
+FINAL_DATA_DIR = '../data/final'
+
 original.wdi = read.csv(file.path(ORIGINAL_DATA_DIR, 'wdi.csv'))
 original.wgi = read.xlsx(file.path(ORIGINAL_DATA_DIR, 'wgi_1996-2016.xlsx'), 3, startRow = 14, rowNames=T, colNames=T)
 original.tincident = read.csv(file.path(ORIGINAL_DATA_DIR, 'terrorist_incidents_1970-2016.csv'))
@@ -96,5 +99,26 @@ for (rowIdx in 1:dim(new.wdi)[1]) {
 # Save to disk.
 write.csv(new.wdi, file.path(PROCESSED_DATA_DIR, 'wdi.csv'))
 
+### DATA MERGING ###
+data.wdi = read.csv(file.path(PROCESSED_DATA_DIR, 'wdi.csv'))
+data.wgi = read.csv(file.path(PROCESSED_DATA_DIR, 'wgi.csv'))
+data.terr = read.csv(file.path(PROCESSED_DATA_DIR, 'terrorism_incidents.csv'))
 
+# Create the full dataset where ALL rows are kept during merge.
+data.all = merge(data.wdi, data.wgi, by=c('country', 'year', 'code'), all.x = TRUE, all.y = TRUE)
+data.all = merge(data.all, data.terr, by=c('country', 'year', 'code'), all.x = TRUE, all.y = TRUE)
+data.all = subset(data.all, select=-c(X.x, X, X.y))
+write.csv(data.all, file.path(FINAL_DATA_DIR, 'data_full.csv'))
 
+# Create a matched dataset where WDI and WGI must have correspond.
+# Terrorism data is filled in where available.
+data.matched_wdi_wgi = merge(data.wdi, data.wgi, by=c('country', 'year', 'code'))
+data.matched_wdi_wgi = merge(data.matched_wdi_wgi, data.terr, by=c('country', 'year', 'code'), all.x = TRUE)
+data.matched_wdi_wgi = subset(data.matched_wdi_wgi, select=-c(X.x, X, X.y))
+write.csv(data.matched_wdi_wgi, file.path(FINAL_DATA_DIR, 'data_matched_wdi_wgi.csv'))
+
+# Create fully matched dataset.
+data.matched_all = merge(data.wdi, data.wgi, by=c('country', 'year', 'code'))
+data.matched_all = merge(data.matched_all, data.terr, by=c('country', 'year', 'code'))
+data.matched_all = subset(data.matched_all, select=-c(X.x, X, X.y))
+write.csv(data.matched_all, file.path(FINAL_DATA_DIR, 'data_matched_all.csv'))
