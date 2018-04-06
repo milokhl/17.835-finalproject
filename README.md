@@ -1,2 +1,3 @@
-# 17.835-finalproject
-Final project code for 17.835.
+# Impact of Food Security on Political Stability
+
+When running ```scripts/process_data.R```, make sure you set the working directory to that of the script!
