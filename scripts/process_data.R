@@ -108,6 +108,8 @@ data.terr = read.csv(file.path(PROCESSED_DATA_DIR, 'terrorism_incidents.csv'))
 data.all = merge(data.wdi, data.wgi, by=c('country', 'year', 'code'), all.x = TRUE, all.y = TRUE)
 data.all = merge(data.all, data.terr, by=c('country', 'year', 'code'), all.x = TRUE, all.y = TRUE)
 data.all = subset(data.all, select=-c(X.x, X, X.y))
+
+convert_numeric_columns = colnames(data.all)[30:35]
 write.csv(data.all, file.path(FINAL_DATA_DIR, 'data_full.csv'))
 
 # Create a matched dataset where WDI and WGI must have correspond.
@@ -121,4 +123,11 @@ write.csv(data.matched_wdi_wgi, file.path(FINAL_DATA_DIR, 'data_matched_wdi_wgi.
 data.matched_all = merge(data.wdi, data.wgi, by=c('country', 'year', 'code'))
 data.matched_all = merge(data.matched_all, data.terr, by=c('country', 'year', 'code'))
 data.matched_all = subset(data.matched_all, select=-c(X.x, X, X.y))
+for (cname in convert_numeric_columns) {
+  print(cname)
+  data.matched_all[,cname] = as.numeric(as.character(data.matched_all[,cname]))
+}
+
+# Remove rows with #NA for WGI.
+data.matched_all = data.matched_all[complete.cases(data.matched_all),]
 write.csv(data.matched_all, file.path(FINAL_DATA_DIR, 'data_matched_all.csv'))
