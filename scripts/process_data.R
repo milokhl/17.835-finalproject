@@ -83,9 +83,13 @@ for (rowIdx in 1:dim(new.wdi)[1]) {
     country = new.wdi[rowIdx, 'country']
     year = new.wdi[rowIdx, 'year']
     yearColIdx = year - 1960 + 5
-    new.wdi[rowIdx, colIdx] = original.wdi[original.wdi$Country.Name == country & original.wdi$Series.Code == seriesCode, yearColIdx]
+    new.wdi[rowIdx, colIdx] = as.numeric(as.character(original.wdi[original.wdi$Country.Name == country & original.wdi$Series.Code == seriesCode, yearColIdx]))
+    # print(as.numeric(as.character(original.wdi[original.wdi$Country.Name == country & original.wdi$Series.Code == seriesCode, yearColIdx])))
   }
 }
+
+as.numeric(original.wdi[original.wdi$Country.Name == country & original.wdi$Series.Code == seriesCode, yearColIdx])
+
 # Finally, map country names to abbreviations.
 country_codes = data.frame(matrix(ncol = 2, nrow = length(all_countries)))
 country_codes[, 1] = all_countries
