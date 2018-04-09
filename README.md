@@ -1,4 +1,5 @@
 # Impact of Food Security on Political Stability
+By AJ Root, Jen McDermott, Talia Blum, and Milo Knowles.
 
 When running ```scripts/process_data.R```, make sure you set the working directory to that of the script!
 
@@ -8,6 +9,7 @@ When running ```scripts/process_data.R```, make sure you set the working directo
 - ```data/final/``` contains post-processed data. ```data_matched_all.csv``` has country-year rows that are matched across all 3 data sources (WDI, WGI, terrorism)
 
 ## Variables
+For a description of WDI variables, see ```data/original/wdi_info.csv```.
 
 - EG.ELC.ACCS.UR.ZS	= Access to electricity, urban (% of urban population)
 - EG.ELC.ACCS.RU.ZS	= Access to electricity, rural (% of rural population)
@@ -34,3 +36,4 @@ When running ```scripts/process_data.R```, make sure you set the working directo
 - SM.POP.REFG.OR = Refugee population by country or territory of origin
 - ER.GDP.FWTL.M3.KD = Water productivity, total (constant 2010 US$ GDP per cubic meter of total freshwater withdrawal)
 
+For a dataset mapping countries to country codes, see ```data/processed/country_codes.csv```.
