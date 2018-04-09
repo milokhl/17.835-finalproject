@@ -39,17 +39,19 @@ years = c(1996, 1998, 2000, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
 # }
 #same deal as above, same number of countries in each remain
 
-datast = na.omit(year.data)
-all.years <- aggregate(.~country, data=datast, FUN=mean)
+year.data = subset(processed.wgi, processed.wgi$stability_index_estimate != '#N/A')
 
-#year.sub = na.omit(subset(year.data, year.data$year == 2004))
-#sPDF <- joinCountryData2Map(year.sub, joinCode = "NAME", nameJoinColumn = "code", verbose=TRUE)
-sPDF <- joinCountryData2Map(all.years, joinCode = "NAME", nameJoinColumn = "code", verbose=TRUE)
+# datast = na.omit(year.data)
+# all.years <- aggregate(.~country, data=datast, FUN=mean)
 
-#mapDevice() #create world map shaped window
-pdf('test.pdf')
-mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', addLegend='FALSE')
-dev.off()
+# #year.sub = na.omit(subset(year.data, year.data$year == 2004))
+# #sPDF <- joinCountryData2Map(year.sub, joinCode = "NAME", nameJoinColumn = "code", verbose=TRUE)
+# sPDF <- joinCountryData2Map(all.years, joinCode = "NAME", nameJoinColumn = "code", verbose=TRUE)
+# 
+# #mapDevice() #create world map shaped window
+# pdf('test.pdf')
+# mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', addLegend='FALSE')
+# dev.off()
 
 allCo <- unique(year.data$country)
 
@@ -62,7 +64,7 @@ for(countr in unique(year.data$country))
 {
   tempSub <- subset(year.data, year.data$country == countr)
   
-  avg.data[counter,] = c(toString(tempSub$code[1]), mean(as.numeric(as.character(tempSub$stability_index_estimate))), 
+  avg.data[counter,] = c(toString(tempSub$code[1]), mean(as.numeric(as.character(tempSub$stability_index_estimate)), na.rm = "TRUE"), 
                          mean(as.numeric(as.character(tempSub$stability_index_stderr))), mean(as.numeric(as.character(tempSub$stability_index_numsrc))), 
                          mean(as.numeric(as.character(tempSub$stability_index_rank))), mean(as.numeric(as.character(tempSub$stability_index_lower))), 
                          mean(as.numeric(as.character(tempSub$stability_index_upper))))
@@ -75,13 +77,21 @@ avg.frame <- data.frame(avg.data)
 
 avg.frame$stability_index_estimate <- as.numeric(as.character(avg.frame$stability_index_estimate))
 
+n=7
+heatcolors = heat.colors(n, alpha = 1)
+revheatcolors = rev(heatcolors)
+# 
+# plot(1:10, 1:10, pch=16, cex=2, col = hcolrev)
+
+
 sPDF <- joinCountryData2Map(avg.frame, joinCode = "NAME", nameJoinColumn = "code", verbose=TRUE)
-pdf("average3.pdf")
+pdf("average.pdf")
 # par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
 # colourPalette <- brewer.pal(5,'RdYlGn')
 
 par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
-map.params <- mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', catMethod='fixedWidth', addLegend='TRUE')
+map.params <- mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', catMethod=c(-3, -2, -1, 0, 1, 2), addLegend='TRUE', missingCountryCol = "grey", 
+                             mapTitle="Average Political Stability Score", oceanCol="lightblue", colourPalette =heatcolors)
 #do.call( addMapLegend, c(map.params, legendWidth=0.5, legendMar = 2))
 
 # do.call( addMapLegend, c( map.params
@@ -102,3 +112,99 @@ dev.off()
 #   dev.off()
 # }
 
+
+
+
+######################################SPECIFIC YEAR FOR JEN
+
+year.data = subset(processed.wgi, processed.wgi$stability_index_estimate != '#N/A')
+
+jen.data = subset(year.data, year.data$year == 2016)
+
+allCo <- unique(jen.data$country)
+
+avg.data1 <- as.matrix(jen.data[0:length(allCo),-c(1,2,4)])
+
+counter <- 1
+
+for(countr in unique(jen.data$country))
+{
+  tempSub <- subset(jen.data, jen.data$country == countr)
+  
+  avg.data1[counter,] = c(toString(tempSub$code[1]), mean(as.numeric(as.character(tempSub$stability_index_estimate)), na.rm = "TRUE"), 
+                         mean(as.numeric(as.character(tempSub$stability_index_stderr))), mean(as.numeric(as.character(tempSub$stability_index_numsrc))), 
+                         mean(as.numeric(as.character(tempSub$stability_index_rank))), mean(as.numeric(as.character(tempSub$stability_index_lower))), 
+                         mean(as.numeric(as.character(tempSub$stability_index_upper))))
+  
+  
+  counter <- counter + 1
+}
+
+avg.frame1 <- data.frame(avg.data1)
+
+avg.frame1$stability_index_estimate <- as.numeric(as.character(avg.frame1$stability_index_estimate))
+
+sPDF <- joinCountryData2Map(avg.frame1, joinCode = "NAME", nameJoinColumn = "code", verbose=TRUE)
+pdf("2016.pdf")
+# par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
+# colourPalette <- brewer.pal(5,'RdYlGn')
+
+par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
+map.params <- mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', catMethod=c(-3, -2, -1, 0, 1, 2), addLegend='TRUE',  
+                             missingCountryCol = "grey", mapTitle="Political Stability Score 2016", oceanCol="lightblue", colourPalette =heatcolors)
+#do.call( addMapLegend, c(map.params, legendWidth=0.5, legendMar = 2))
+
+# do.call( addMapLegend, c( map.params
+#                           , legendLabels="all"
+#                           , legendWidth=0.5 ))
+
+dev.off()
+
+
+
+
+
+######################################SPECIFIC YEAR FOR JEN
+
+year.data = subset(processed.wgi, processed.wgi$stability_index_estimate != '#N/A')
+
+jen.data = subset(year.data, year.data$year == 1996)
+
+allCo <- unique(jen.data$country)
+
+avg.data1 <- as.matrix(jen.data[0:length(allCo),-c(1,2,4)])
+
+counter <- 1
+
+for(countr in unique(jen.data$country))
+{
+  tempSub <- subset(jen.data, jen.data$country == countr)
+  
+  avg.data1[counter,] = c(toString(tempSub$code[1]), mean(as.numeric(as.character(tempSub$stability_index_estimate)), na.rm = "TRUE"), 
+                          mean(as.numeric(as.character(tempSub$stability_index_stderr))), mean(as.numeric(as.character(tempSub$stability_index_numsrc))), 
+                          mean(as.numeric(as.character(tempSub$stability_index_rank))), mean(as.numeric(as.character(tempSub$stability_index_lower))), 
+                          mean(as.numeric(as.character(tempSub$stability_index_upper))))
+  
+  
+  counter <- counter + 1
+}
+
+avg.frame1 <- data.frame(avg.data1)
+
+avg.frame1$stability_index_estimate <- as.numeric(as.character(avg.frame1$stability_index_estimate))
+
+sPDF <- joinCountryData2Map(avg.frame1, joinCode = "NAME", nameJoinColumn = "code", verbose=TRUE)
+pdf("1996.pdf")
+# par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
+# colourPalette <- brewer.pal(5,'RdYlGn')
+
+par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
+map.params <- mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', catMethod=c(-3, -2, -1, 0, 1, 2), addLegend='TRUE',  
+                             missingCountryCol = "grey", mapTitle="Political Stability Score 1996", oceanCol="lightblue", colourPalette =heatcolors)
+#do.call( addMapLegend, c(map.params, legendWidth=0.5, legendMar = 2))
+
+# do.call( addMapLegend, c( map.params
+#                           , legendLabels="all"
+#                           , legendWidth=0.5 ))
+
+dev.off()
