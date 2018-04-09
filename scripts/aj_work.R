@@ -77,7 +77,7 @@ avg.frame <- data.frame(avg.data)
 
 avg.frame$stability_index_estimate <- as.numeric(as.character(avg.frame$stability_index_estimate))
 
-n=7
+n=10
 heatcolors = heat.colors(n, alpha = 1)
 revheatcolors = rev(heatcolors)
 # 
@@ -90,7 +90,7 @@ pdf("average.pdf")
 # colourPalette <- brewer.pal(5,'RdYlGn')
 
 par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
-map.params <- mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', catMethod=c(-3, -2, -1, 0, 1, 2), addLegend='TRUE', missingCountryCol = "grey", 
+map.params <- mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', catMethod=seq(-3, 2, by=.5), addLegend='TRUE', missingCountryCol = "grey", 
                              mapTitle="Average Political Stability Score", oceanCol="lightblue", colourPalette =heatcolors)
 #do.call( addMapLegend, c(map.params, legendWidth=0.5, legendMar = 2))
 
@@ -150,7 +150,7 @@ pdf("2016.pdf")
 # colourPalette <- brewer.pal(5,'RdYlGn')
 
 par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
-map.params <- mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', catMethod=c(-3, -2, -1, 0, 1, 2), addLegend='TRUE',  
+map.params <- mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', catMethod=seq(-3, 2, by=.5), addLegend='TRUE',  
                              missingCountryCol = "grey", mapTitle="Political Stability Score 2016", oceanCol="lightblue", colourPalette =heatcolors)
 #do.call( addMapLegend, c(map.params, legendWidth=0.5, legendMar = 2))
 
@@ -199,7 +199,7 @@ pdf("1996.pdf")
 # colourPalette <- brewer.pal(5,'RdYlGn')
 
 par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
-map.params <- mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', catMethod=c(-3, -2, -1, 0, 1, 2), addLegend='TRUE',  
+map.params <- mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', catMethod=seq(-3, 2, by=.5), addLegend='TRUE',  
                              missingCountryCol = "grey", mapTitle="Political Stability Score 1996", oceanCol="lightblue", colourPalette =heatcolors)
 #do.call( addMapLegend, c(map.params, legendWidth=0.5, legendMar = 2))
 
