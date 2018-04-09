@@ -128,10 +128,10 @@ write.csv(data.matched_wdi_wgi, file.path(FINAL_DATA_DIR, 'data_matched_wdi_wgi.
 data.matched_all = merge(data.wdi, data.wgi, by=c('country', 'year', 'code'))
 data.matched_all = merge(data.matched_all, data.terr, by=c('country', 'year', 'code'))
 data.matched_all = subset(data.matched_all, select=-c(X.x, X, X.y))
-# for (cname in convert_numeric_columns) {
-#   print(cname)
-#   data.matched_all[,cname] = as.numeric(as.character(data.matched_all[,cname]))
-# }
+for (cname in convert_numeric_columns) {
+  print(cname)
+  data.matched_all[,cname] = as.numeric(as.character(data.matched_all[,cname]))
+}
 
 for (c in colnames(data.matched_all)) {
   print('-------')
