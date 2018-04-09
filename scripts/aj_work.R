@@ -53,7 +53,7 @@ dev.off()
 
 allCo <- unique(year.data$country)
 
-avg.data <- as.matrix(year.data[0:length(allCo),-c(1,4)])
+avg.data <- as.matrix(year.data[0:length(allCo),-c(1,2,4)])
 
 counter<- 1
 
@@ -62,7 +62,7 @@ for(countr in unique(year.data$country))
 {
   tempSub <- subset(year.data, year.data$country == countr)
   
-  avg.data[counter,] = c(toString(tempSub$country[1]), toString(tempSub$code[1]), mean(as.numeric(as.character(tempSub$stability_index_estimate))), 
+  avg.data[counter,] = c(toString(tempSub$code[1]), mean(as.numeric(as.character(tempSub$stability_index_estimate))), 
                          mean(as.numeric(as.character(tempSub$stability_index_stderr))), mean(as.numeric(as.character(tempSub$stability_index_numsrc))), 
                          mean(as.numeric(as.character(tempSub$stability_index_rank))), mean(as.numeric(as.character(tempSub$stability_index_lower))), 
                          mean(as.numeric(as.character(tempSub$stability_index_upper))))
@@ -73,18 +73,32 @@ for(countr in unique(year.data$country))
 
 avg.frame <- data.frame(avg.data)
 
+avg.frame$stability_index_estimate <- as.numeric(as.character(avg.frame$stability_index_estimate))
+
 sPDF <- joinCountryData2Map(avg.frame, joinCode = "NAME", nameJoinColumn = "code", verbose=TRUE)
-pdf("average.pdf")
-mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', addLegend='FALSE')
+pdf("average3.pdf")
+# par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
+# colourPalette <- brewer.pal(5,'RdYlGn')
+
+par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
+map.params <- mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', catMethod='fixedWidth', addLegend='TRUE')
+#do.call( addMapLegend, c(map.params, legendWidth=0.5, legendMar = 2))
+
+# do.call( addMapLegend, c( map.params
+#                           , legendLabels="all"
+#                           , legendWidth=0.5 ))
+
+
+
 dev.off()
 
 
-for(year in years){
-  year.sub = na.omit(subset(year.data, year.data$year == year))
-  sPDF <- joinCountryData2Map(year.sub, joinCode = "NAME", nameJoinColumn = "code", verbose=TRUE)
-  name =paste("testyear", toString(year), ".pdf", sep="")
-  pdf(name)
-  mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', addLegend='FALSE')
-  dev.off()
-}
+# for(year in years){
+#   year.sub = na.omit(subset(year.data, year.data$year == year))
+#   sPDF <- joinCountryData2Map(year.sub, joinCode = "NAME", nameJoinColumn = "code", verbose=TRUE)
+#   name =paste("testyear", toString(year), ".pdf", sep="")
+#   pdf(name)
+#   mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', addLegend='FALSE')
+#   dev.off()
+# }
 
