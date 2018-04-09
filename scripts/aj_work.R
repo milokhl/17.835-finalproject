@@ -77,14 +77,21 @@ avg.frame <- data.frame(avg.data)
 
 avg.frame$stability_index_estimate <- as.numeric(as.character(avg.frame$stability_index_estimate))
 
+n=7
+heatcolors = heat.colors(n, alpha = 1)
+revheatcolors = rev(heatcolors)
+# 
+# plot(1:10, 1:10, pch=16, cex=2, col = hcolrev)
+
+
 sPDF <- joinCountryData2Map(avg.frame, joinCode = "NAME", nameJoinColumn = "code", verbose=TRUE)
 pdf("average.pdf")
 # par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
 # colourPalette <- brewer.pal(5,'RdYlGn')
 
 par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
-map.params <- mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', catMethod='fixedWidth', addLegend='TRUE', missingCountryCol = "grey", 
-                             mapTitle="Avergage Political Stability Score", oceanCol="lightblue")
+map.params <- mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', catMethod=c(-3, -2, -1, 0, 1, 2), addLegend='TRUE', missingCountryCol = "grey", 
+                             mapTitle="Average Political Stability Score", oceanCol="lightblue", colourPalette =heatcolors)
 #do.call( addMapLegend, c(map.params, legendWidth=0.5, legendMar = 2))
 
 # do.call( addMapLegend, c( map.params
@@ -143,8 +150,8 @@ pdf("2016.pdf")
 # colourPalette <- brewer.pal(5,'RdYlGn')
 
 par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
-map.params <- mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', catMethod='fixedWidth', addLegend='TRUE',  
-                             missingCountryCol = "grey", mapTitle="Political Stability Score 2016", oceanCol="lightblue")
+map.params <- mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', catMethod=c(-3, -2, -1, 0, 1, 2), addLegend='TRUE',  
+                             missingCountryCol = "grey", mapTitle="Political Stability Score 2016", oceanCol="lightblue", colourPalette =heatcolors)
 #do.call( addMapLegend, c(map.params, legendWidth=0.5, legendMar = 2))
 
 # do.call( addMapLegend, c( map.params
@@ -192,8 +199,8 @@ pdf("1996.pdf")
 # colourPalette <- brewer.pal(5,'RdYlGn')
 
 par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
-map.params <- mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', catMethod='fixedWidth', addLegend='TRUE',  
-                             missingCountryCol = "grey", mapTitle="Political Stability Score 1996", oceanCol="lightblue")
+map.params <- mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', catMethod=c(-3, -2, -1, 0, 1, 2), addLegend='TRUE',  
+                             missingCountryCol = "grey", mapTitle="Political Stability Score 1996", oceanCol="lightblue", colourPalette =heatcolors)
 #do.call( addMapLegend, c(map.params, legendWidth=0.5, legendMar = 2))
 
 # do.call( addMapLegend, c( map.params
