@@ -66,12 +66,6 @@ data.copy <- read.csv(file.path(FINAL_DATA_DIR, 'data_matched_all.csv'))
 # plotcluster(dat, clus$cluster)
 
 
-years = c(1996, 1998, 2000, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
-          2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016)
-
-
-
-
 library(cluster)
 library(fpc)
 
@@ -80,9 +74,18 @@ data.full = read.csv(file.path(FINAL_DATA_DIR, 'data_matched_all.csv'))
 
 data.copy <- as.data.frame(data.full)
 
+years = c(1996, 1998, 2000, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
+          2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016)
 
-for (year_val in c(1996)) {
+# for (year_val in years) {
+#   dir.create(toString(year_val))
+# }
+
+
+for (year_val in years) {
   
+
+
   temp.data <- subset(data.copy, data.copy$year == year_val)
   #print(removed_columns(temp.data))
   
@@ -132,13 +135,13 @@ for (year_val in c(1996)) {
   
   
   for(i in 1:20) {
-    jpeg(paste0("kmeans_", year_val, "_",i,".jpg")) 
+    jpeg(paste0(year_val,"/", "kmeans_", year_val, "_",i,".jpg")) 
     clus <- kmeans(scaled.year, centers=i)
     clusplot(scaled.year, clus$cluster, color=TRUE, shade=TRUE, 
              labels=2, lines=0)
     dev.off() 
     
-    jpeg(paste0("kmeans_", year_val, "_",i,"_index.jpg")) 
+    jpeg(paste0(year_val, "/",  "kmeans_", year_val, "_",i,"_index.jpg")) 
     clus_ind <- kmeans(scaled.index, centers=i)
     clusplot(scaled.index, clus_ind$cluster, color=TRUE, shade=TRUE, 
              labels=2, lines=0)
