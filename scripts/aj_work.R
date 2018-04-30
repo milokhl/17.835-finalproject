@@ -85,11 +85,12 @@ revheatcolors = rev(heatcolors)
 
 
 sPDF <- joinCountryData2Map(avg.frame, joinCode = "NAME", nameJoinColumn = "code", verbose=TRUE)
-pdf("average.pdf")
+pdf("averageis.pdf", width=1000, height=1000)
 # par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
 # colourPalette <- brewer.pal(5,'RdYlGn')
 
 par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
+
 map.params <- mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', catMethod=seq(-3, 2, by=.5), addLegend='TRUE', missingCountryCol = "grey", 
                              mapTitle="Average Political Stability Score", oceanCol="lightblue", colourPalette =heatcolors)
 #do.call( addMapLegend, c(map.params, legendWidth=0.5, legendMar = 2))
@@ -145,7 +146,7 @@ avg.frame1 <- data.frame(avg.data1)
 avg.frame1$stability_index_estimate <- as.numeric(as.character(avg.frame1$stability_index_estimate))
 
 sPDF <- joinCountryData2Map(avg.frame1, joinCode = "NAME", nameJoinColumn = "code", verbose=TRUE)
-pdf("2016.pdf")
+jpeg("2016.jpg")
 # par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
 # colourPalette <- brewer.pal(5,'RdYlGn')
 
@@ -193,13 +194,13 @@ avg.frame1 <- data.frame(avg.data1)
 
 avg.frame1$stability_index_estimate <- as.numeric(as.character(avg.frame1$stability_index_estimate))
 
-sPDF <- joinCountryData2Map(avg.frame1, joinCode = "NAME", nameJoinColumn = "code", verbose=TRUE)
-pdf("1996.pdf")
+sPDF1 <- joinCountryData2Map(avg.frame1, joinCode = "NAME", nameJoinColumn = "code", verbose=TRUE)
+jpeg("1996.jpg")
 # par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
 # colourPalette <- brewer.pal(5,'RdYlGn')
 
 par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
-map.params <- mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', catMethod=seq(-3, 2, by=.5), addLegend='TRUE',  
+map.params <- mapCountryData(sPDF1, nameColumnToPlot='stability_index_estimate', catMethod=seq(-3, 2, by=.5), addLegend='TRUE',  
                              missingCountryCol = "grey", mapTitle="Political Stability Score 1996", oceanCol="lightblue", colourPalette =heatcolors)
 #do.call( addMapLegend, c(map.params, legendWidth=0.5, legendMar = 2))
 
@@ -208,3 +209,26 @@ map.params <- mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', 
 #                           , legendWidth=0.5 ))
 
 dev.off()
+
+
+
+jpeg("merged.jpg")
+# par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
+# colourPalette <- brewer.pal(5,'RdYlGn')
+
+par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
+map.params <- mapCountryData(sPDF1, nameColumnToPlot='stability_index_estimate', catMethod=seq(-3, 2, by=.5), addLegend='TRUE',  
+                             missingCountryCol = "grey", mapTitle="Political Stability Score 1996", oceanCol="lightblue", colourPalette =heatcolors)
+#do.call( addMapLegend, c(map.params, legendWidth=0.5, legendMar = 2))
+
+# do.call( addMapLegend, c( map.params
+#                           , legendLabels="all"
+#                           , legendWidth=0.5 ))
+
+par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
+map.params <- mapCountryData(sPDF, nameColumnToPlot='stability_index_estimate', catMethod=seq(-3, 2, by=.5), addLegend='TRUE',  
+                             missingCountryCol = "grey", mapTitle="Political Stability Score 2016", oceanCol="lightblue", colourPalette =heatcolors)
+#do.call( addMapLegend, c(map.params, legendWidth=0.5, legendMar = 2))
+
+dev.off()
+
