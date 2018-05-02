@@ -77,9 +77,9 @@ data.copy <- as.data.frame(data.full)
 years = c(1996, 1998, 2000, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
           2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016)
 
-# for (year_val in years) {
-#   dir.create(toString(year_val))
-# }
+for (year_val in years) {
+  dir.create(toString(year_val))
+}
 
 
 for (year_val in years) {
@@ -134,19 +134,46 @@ for (year_val in years) {
   scaled.index <- scale(altered.index)
   
   
-  for(i in 1:20) {
-    jpeg(paste0(year_val,"/", "kmeans_", year_val, "_",i,".jpg")) 
+  # for(i in 1:20) {
+  #   jpeg(paste0(year_val,"/", "kmeans_", year_val, "_",i,".jpg")) 
+  #   clus <- kmeans(scaled.year, centers=i)
+  #   clusplot(scaled.year, clus$cluster, color=TRUE, shade=TRUE, 
+  #            labels=2, lines=0)
+  #   dev.off() 
+  #   
+  #   jpeg(paste0(year_val, "/",  "kmeans_", year_val, "_",i,"_index.jpg")) 
+  #   clus_ind <- kmeans(scaled.index, centers=i)
+  #   clusplot(scaled.index, clus_ind$cluster, color=TRUE, shade=TRUE, 
+  #            labels=2, lines=0)
+  #   dev.off() 
+  # }
+  
+  
+  for(i in 2:10) {
+    jpeg(paste0(year_val,"/", "kmaps_", year_val, "_",i,".jpg")) 
     clus <- kmeans(scaled.year, centers=i)
-    clusplot(scaled.year, clus$cluster, color=TRUE, shade=TRUE, 
-             labels=2, lines=0)
+
+    world_data = as.data.frame(clus$cluster)
+    world_data$code = row.names(world_data)
+    
+    heatcolors = heat.colors(i, alpha = 1)
+    revheatcolors = rev(heatcolors)
+    
+    sPDF <- joinCountryData2Map(world_data, joinCode = "NAME", nameJoinColumn = "code", verbose=TRUE)
+    
+    par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
+    
+    map.params <- mapCountryData(sPDF, nameColumnToPlot='clus$cluster', addLegend='TRUE',  catMethod = "pretty",  missingCountryCol = "grey", 
+                                 mapTitle="K Means Clustering", oceanCol="lightblue", colourPalette =heatcolors)
+    
+    
+    
     dev.off() 
     
-    jpeg(paste0(year_val, "/",  "kmeans_", year_val, "_",i,"_index.jpg")) 
-    clus_ind <- kmeans(scaled.index, centers=i)
-    clusplot(scaled.index, clus_ind$cluster, color=TRUE, shade=TRUE, 
-             labels=2, lines=0)
-    dev.off() 
-}
+  }
+
+  
+  
 
 }
 
