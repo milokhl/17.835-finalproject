@@ -5,9 +5,13 @@
 library('openxlsx')
 
 # MAKE SURE CURRENT WORKING DIRECTORY IS SET TO THIS FILE!
-PROCESSED_DATA_DIR = '../data/processed/'
-ORIGINAL_DATA_DIR = '../data/original/'
-FINAL_DATA_DIR = '../data/final'
+setwd('C:/Users/aroot/Desktop/Classes/17.835/Project/gitstuff/17.835-finalproject/images/kmeans/')
+
+
+# MAKE SURE CURRENT WORKING DIRECTORY IS SET TO THIS FILE!
+PROCESSED_DATA_DIR = 'C:/Users/aroot/Desktop/Classes/17.835/Project/gitstuff/17.835-finalproject/data/processed/'
+ORIGINAL_DATA_DIR = 'C:/Users/aroot/Desktop/Classes/17.835/Project/gitstuff/17.835-finalproject/data/original/'
+FINAL_DATA_DIR = 'C:/Users/aroot/Desktop/Classes/17.835/Project/gitstuff/17.835-finalproject/data/final'
 
 original.wdi = read.csv(file.path(ORIGINAL_DATA_DIR, 'wdi.csv'))
 original.wgi = read.xlsx(file.path(ORIGINAL_DATA_DIR, 'wgi_1996-2016.xlsx'), 3, startRow = 14, rowNames=T, colNames=T)
