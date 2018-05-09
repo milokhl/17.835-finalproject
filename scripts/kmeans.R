@@ -76,15 +76,14 @@ data.copy <- as.data.frame(data.full)
 
 years = c(1996, 1998, 2000, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
           2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016)
-
-for (year_val in years) {
-  dir.create(toString(year_val))
-}
+# 
+# for (year_val in years) {
+#   dir.create(toString(year_val))
+# }
 
 
 for (year_val in years) {
   
-
 
   temp.data <- subset(data.copy, data.copy$year == year_val)
   #print(removed_columns(temp.data))
@@ -114,7 +113,7 @@ for (year_val in years) {
   altered.index <- altered.year[, c("stability_index_numsrc", "stability_index_rank", "stability_index_lower", "stability_index_upper", "stability_index_estimate", 
                                     "stability_index_stderr")]
   
-  #row.names(altered.index) <- altered.year$code
+  maintain.stab <- altered.year$stability_index_estimate
   
   remove.names <- c("stability_index_numsrc", "stability_index_rank", "stability_index_lower", "stability_index_upper", "stability_index_estimate", 
                     "stability_index_stderr", "X", "country", "year", "code")
@@ -150,7 +149,7 @@ for (year_val in years) {
   
   
   for(i in 2:10) {
-    jpeg(paste0(year_val,"/", "kmaps_", year_val, "_",i,".jpg")) 
+    # jpeg(paste0(year_val,"/", "kmaps_", year_val, "_",i,".jpg")) 
     clus <- kmeans(scaled.year, centers=i)
 
     world_data = as.data.frame(clus$cluster)
@@ -159,16 +158,22 @@ for (year_val in years) {
     heatcolors = heat.colors(i, alpha = 1)
     revheatcolors = rev(heatcolors)
     
-    sPDF <- joinCountryData2Map(world_data, joinCode = "NAME", nameJoinColumn = "code", verbose=TRUE)
+    # sPDF <- joinCountryData2Map(world_data, joinCode = "NAME", nameJoinColumn = "code", verbose=TRUE)
+    # 
+    # par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
+    # 
+    # map.params <- mapCountryData(sPDF, nameColumnToPlot='clus$cluster', addLegend='TRUE',  catMethod = "pretty",  missingCountryCol = "grey", 
+    #                              mapTitle=paste0("K Means Clustering - Year: ", year_val, " Clusters: ", i), oceanCol="lightblue", colourPalette =heatcolors)
+    # 
+    # 
+    # 
+    # dev.off() 
     
-    par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
+    jpeg(paste0(year_val,"/", "corre_", year_val, "_",i,".jpg")) 
     
-    map.params <- mapCountryData(sPDF, nameColumnToPlot='clus$cluster', addLegend='TRUE',  catMethod = "pretty",  missingCountryCol = "grey", 
-                                 mapTitle="K Means Clustering", oceanCol="lightblue", colourPalette =heatcolors)
+    plot(world_data$`clus$cluster`, maintain.stab)
     
-    
-    
-    dev.off() 
+    dev.off()
     
   }
 
