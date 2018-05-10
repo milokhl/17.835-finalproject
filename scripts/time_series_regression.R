@@ -121,3 +121,22 @@ model.elec.tplus3 = lm(stability_index_estimate_tplus3 ~ EG.ELC.ACCS.ZS, data=da
 summary(model.elec.tplus1)
 summary(model.elec.tplus2)
 summary(model.elec.tplus3)
+
+# Some correlation tests...
+length(data.slid1$stability_index_estimate)
+length(data.slid1$stability_index_estimate_tplus1)
+
+summary(data.slid1$stability_index_estimate)
+summary(data.slid1$stability_index_estimate_tplus1)
+
+# Really strong autocorrelation between stability now and stability next year (expected)
+cor(data.slid1$stability_index_estimate, data.slid1$stability_index_estimate_tplus1, use='complete.obs')
+
+# Slightly higher correlation between current stability and access to water than
+# next year's stability and access to water.
+cor(data.slid1$stability_index_estimate_tplus1, data.slid1$SH.H2O.BASW.ZS, use='complete.obs')
+cor(data.slid1$stability_index_estimate, data.slid1$SH.H2O.BASW.ZS, use='complete.obs')
+
+
+###################### SINGLE VARIABLE MODELS, CONTROLLING FOR CONFOUNDING VARIABLES ##############
+# TODO
