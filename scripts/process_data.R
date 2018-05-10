@@ -1,22 +1,24 @@
 # This script primarily puts all of the datasets into (country, year) row ordering.
+# It creates 3 datasets:
+#     final/data_full.csv               Merged result of WDI, WGI, and global terrorism (all rows included).
+#     final/data_matched_all.csv        Merged result of WDI, WGI, and global terrorism (only country-year pairs they have in common).
+#     final/data_matched_wdi_wgi.csv    Merged result of WDI and WGI (only country-year pairs they have in common).
 
 # Get XLSX package.
 # install.packages('openxlsx') # Uncomment this to install the package.
 library('openxlsx')
 
-# MAKE SURE CURRENT WORKING DIRECTORY IS SET TO THIS FILE!
-setwd('C:/Users/aroot/Desktop/Classes/17.835/Project/gitstuff/17.835-finalproject/images/kmeans/')
+# MAKE SURE CURRENT WORKING DIRECTORY IS SET TO THAT OF THIS FILE!
+ORIGINAL_DATA_DIR = '../data/original/' # RAW DATASETS COME FROM HERE.
+PROCESSED_DATA_DIR = '../data/processed/' # RAW DATASETS ARE REFORMATTED AND CLEANED UP, THEN PUT HERE.
+FINAL_DATA_DIR = '../data/final' # MERGED DATASETS GO HERE.
 
-
-# MAKE SURE CURRENT WORKING DIRECTORY IS SET TO THIS FILE!
-PROCESSED_DATA_DIR = 'C:/Users/aroot/Desktop/Classes/17.835/Project/gitstuff/17.835-finalproject/data/processed/'
-ORIGINAL_DATA_DIR = 'C:/Users/aroot/Desktop/Classes/17.835/Project/gitstuff/17.835-finalproject/data/original/'
-FINAL_DATA_DIR = 'C:/Users/aroot/Desktop/Classes/17.835/Project/gitstuff/17.835-finalproject/data/final'
-
+# Read in the raw data.
 original.wdi = read.csv(file.path(ORIGINAL_DATA_DIR, 'wdi.csv'))
 original.wgi = read.xlsx(file.path(ORIGINAL_DATA_DIR, 'wgi_1996-2016.xlsx'), 3, startRow = 14, rowNames=T, colNames=T)
 original.tincident = read.csv(file.path(ORIGINAL_DATA_DIR, 'terrorist_incidents_1970-2016.csv'))
 
+############################################# DATA PROCESSING ######################################################
 ### PROCESS THE WGI DATA. ###
 # Create new dataframe.
 new.wgi = data.frame(matrix(ncol = 9, nrow = dim(original.wgi)[1]-1))
@@ -108,7 +110,8 @@ for (rowIdx in 1:dim(new.wdi)[1]) {
 summary(new.wdi)
 write.csv(new.wdi, file.path(PROCESSED_DATA_DIR, 'wdi.csv'))
 
-### DATA MERGING ###
+################################## DATA MERGING ################################################
+# Read the processed datasets.
 data.wdi = read.csv(file.path(PROCESSED_DATA_DIR, 'wdi.csv'))
 data.wgi = read.csv(file.path(PROCESSED_DATA_DIR, 'wgi.csv'))
 data.terr = read.csv(file.path(PROCESSED_DATA_DIR, 'terrorism_incidents.csv'))
@@ -126,6 +129,11 @@ write.csv(data.all, file.path(FINAL_DATA_DIR, 'data_full.csv'))
 data.matched_wdi_wgi = merge(data.wdi, data.wgi, by=c('country', 'year', 'code'))
 data.matched_wdi_wgi = merge(data.matched_wdi_wgi, data.terr, by=c('country', 'year', 'code'), all.x = TRUE)
 data.matched_wdi_wgi = subset(data.matched_wdi_wgi, select=-c(X.x, X, X.y))
+for (cname in convert_numeric_columns) {
+  print(cname)
+  data.matched_wdi_wgi[,cname] = as.numeric(as.character(data.matched_wdi_wgi[,cname]))
+}
+summary(data.matched_wdi_wgi)
 write.csv(data.matched_wdi_wgi, file.path(FINAL_DATA_DIR, 'data_matched_wdi_wgi.csv'))
 
 # Create fully matched dataset.
@@ -143,6 +151,7 @@ for (c in colnames(data.matched_all)) {
   print(summary(data.matched_all[,c]))
 }
 
-# Remove rows with #NA for WGI.
-data.matched_all = data.matched_all[complete.cases(data.matched_all),]
-write.csv(data.matched_all, file.path(FINAL_DATA_DIR, 'data_matched_all.csv'))
+# These commands will only keep rows with valid entries in all rows.
+# Unfortunately, there are very few (~9) rows with no NAs in all columns...
+# data.matched_all = data.matched_all[complete.cases(data.matched_all),]
+# write.csv(data.matched_all, file.path(FINAL_DATA_DIR, 'data_matched_all.csv'))
