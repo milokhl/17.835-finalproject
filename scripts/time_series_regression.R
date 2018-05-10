@@ -69,6 +69,11 @@ summary(model.water_access.tplus1) # R^2 = 0.2607
 summary(model.water_access.tplus2) # R^2 = 0.2629
 summary(model.water_access.tplus3) # R^2 = 0.2637
 
+plot(x = data.slid1$SH.H2O.SAFE.ZS, y = data.slid1$stability_index_estimate_tplus1,
+     pch = 1, cex = 0.2, col='blue', main='Stability Index (t+1)',
+     xlab = 'Access to improved water source (% of pop)', ylab='Stability Index')
+abline(model.water_access.tplus1)
+
 ## SH.H2O.BASW.ZS = People using basic drinking water services (% of pop)
 model.basic_water.tplus1 = lm(stability_index_estimate_tplus1 ~ SH.H2O.BASW.ZS, data=data.slid1)
 model.basic_water.tplus2 = lm(stability_index_estimate_tplus2 ~ SH.H2O.BASW.ZS, data=data.slid2)
@@ -83,9 +88,9 @@ model.undernourishment.tplus1 = lm(stability_index_estimate_tplus1 ~ SN.ITK.DEFC
 model.undernourishment.tplus2 = lm(stability_index_estimate_tplus2 ~ SN.ITK.DEFC.ZS, data=data.slid2)
 model.undernourishment.tplus3 = lm(stability_index_estimate_tplus3 ~ SN.ITK.DEFC.ZS, data=data.slid3)
 
-summary(model.undernourishment.tplus1)
-summary(model.undernourishment.tplus2)
-summary(model.undernourishment.tplus3)
+summary(model.undernourishment.tplus1) # R^2 = 0.194
+summary(model.undernourishment.tplus2) # R^2 = 0.1894
+summary(model.undernourishment.tplus3) # R^2 = 0.1862
 
 ## AG.PRD.FOOD.XD = Food production index
 # Note: this has a really tiny R^2 = 0.001, so it isn't a good predictor.
