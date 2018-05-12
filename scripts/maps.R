@@ -33,7 +33,7 @@ data.vis <- data.frame(matrix(ncol = 0, nrow = nrow(data.full)))
 data.vis$code <- data.full$code
 data.vis$year <- data.full$year
 data.vis$water <- data.full$SH.H2O.BASW.ZS
-data.vis$deficit <- data.full$SN.ITK.DFCT
+data.vis$deficit <- -data.full$SN.ITK.DEFC.ZS
 data.vis$deficitneg <- -data.full$SN.ITK.DFCT
 data.vis$stable <- data.full$stability_index_estimate
 
@@ -78,14 +78,14 @@ print(test)
 image_write(test, paste("water", toString(yd), "annot", ".jpg", sep=""))
 
 
-name =paste("deficit", toString(yd), ".jpg", sep="")
+name =paste("undernourished", toString(yd), ".jpg", sep="")
 jpeg(name)
 
 par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
 
 
-map.params <- mapCountryData(sPDF, nameColumnToPlot='deficitneg', catMethod=seq(-600, 0, by=50), addLegend='TRUE', missingCountryCol = "grey", 
-                             mapTitle = paste("Kcal Deficit (Negative)", toString(yd), sep=" ") , oceanCol="lightblue", colourPalette =heatcolors)
+map.params <- mapCountryData(sPDF, nameColumnToPlot='deficit', catMethod=seq(-60, 0, by=5), addLegend='TRUE', missingCountryCol = "grey", 
+                             mapTitle = paste("Percent Undernourished", toString(yd), sep=" ") , oceanCol="lightblue", colourPalette =heatcolors)
 
 dev.off()
 
@@ -97,7 +97,7 @@ test <- image_flip(test)
 
 print(test)
 
-image_write(test, paste("deficit", toString(yd), "annot", ".jpg", sep=""))
+image_write(test, paste("undernourished", toString(yd), "annot", ".jpg", sep=""))
 
 
 name =paste("stability", toString(yd), ".jpg", sep="")
