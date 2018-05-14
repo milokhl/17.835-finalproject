@@ -2,15 +2,12 @@
 # 17.835 Final Project
 # Milo & Jen
 
-install.packages('DataCombine')
+# install.packages('DataCombine')
 library(DataCombine)
-
-# Models to try:
-  # TSR w/ Single Variables over multiple lags
-  # TSR w/ Multi Variables over multiple lags
 
 # Use the WDI/WGI matched dataset, since we don't care about global terrorism.
 data = read.csv("../data/final/data_matched_wdi_wgi.csv")
+data$year = as.factor(data$year)
 
 # Variables to try:
   # SH.H2O.SAFE.ZS = Access to improved water source (% of pop)
@@ -50,6 +47,16 @@ data.slid2 = slide(data.chrono, Var='stability_index_estimate', TimeVar='year',
 data.slid3 = slide(data.chrono, Var='stability_index_estimate', TimeVar='year',
                    GroupVar='country', NewVar='stability_index_estimate_tplus3',
                    slideBy=3, keepInvalid=FALSE, reminder=TRUE)
+
+data.tm1 = slide(data.chrono, Var='stability_index_estimate', TimeVar='year',
+                 GroupVar='country', NewVar='stability_index_estimate_tm1',
+                 slideBy=-1, keepInvalid=FALSE, reminder=TRUE)
+data.tm2 = slide(data.chrono, Var='stability_index_estimate', TimeVar='year',
+                 GroupVar='country', NewVar='stability_index_estimate_tm2',
+                 slideBy=-2, keepInvalid=FALSE, reminder=TRUE)
+data.tm3 = slide(data.chrono, Var='stability_index_estimate', TimeVar='year',
+                 GroupVar='country', NewVar='stability_index_estimate_tm3',
+                 slideBy=-3, keepInvalid=FALSE, reminder=TRUE)
 
 #################### SINGLE VARIABLE MODELS ######################
 # Variables to try:
@@ -137,6 +144,177 @@ cor(data.slid1$stability_index_estimate, data.slid1$stability_index_estimate_tpl
 cor(data.slid1$stability_index_estimate_tplus1, data.slid1$SH.H2O.BASW.ZS, use='complete.obs')
 cor(data.slid1$stability_index_estimate, data.slid1$SH.H2O.BASW.ZS, use='complete.obs')
 
-
 ###################### SINGLE VARIABLE MODELS, CONTROLLING FOR CONFOUNDING VARIABLES ##############
-# TODO
+model.foodwater.formula = stability_index_estimate_tplus1 ~ SH.H2O.SAFE.ZS + SH.H2O.BASW.ZS +
+  SN.ITK.DEFC.ZS + AG.PRD.FOOD.XD + stability_index_estimate
+
+model.foodwater.tplus1 = lm(model.foodwater.formula, data=data.slid1)
+model.foodwater.tplus2 = lm(model.foodwater.formula, data=data.slid2)
+model.foodwater.tplus3 = lm(model.foodwater.formula, data=data.slid3)
+
+summary(model.foodwater.tplus1) # R^2 = 0.2607
+summary(model.foodwater.tplus2) # R^2 = 0.2629
+summary(model.foodwater.tplus3) # R^2 = 0.2637
+
+###################### DISTRIBUTED LAG MODEL ############################
+
+## SN.ITK.DEFC.ZS
+data.all.lagged = slide(data.chrono, Var='stability_index_estimate', TimeVar='year',
+                        GroupVar='country', NewVar='stability_index_estimate_tm1',
+                        slideBy=-1, keepInvalid=FALSE, reminder=TRUE)
+data.all.lagged = slide(data.all.lagged, Var='SN.ITK.DEFC.ZS', TimeVar='year',
+                        GroupVar='country', NewVar='SN.ITK.DEFC.ZS_tm1',
+                        slideBy=-1, keepInvalid=FALSE, reminder=TRUE)
+data.all.lagged = slide(data.all.lagged, Var='SN.ITK.DEFC.ZS', TimeVar='year',
+                        GroupVar='country', NewVar='SN.ITK.DEFC.ZS_tm2',
+                        slideBy=-2, keepInvalid=FALSE, reminder=TRUE)
+data.all.lagged = slide(data.all.lagged, Var='SN.ITK.DEFC.ZS', TimeVar='year',
+                        GroupVar='country', NewVar='SN.ITK.DEFC.ZS_tm3',
+                        slideBy=-3, keepInvalid=FALSE, reminder=TRUE)
+
+data.all.lagged$SN.ITK.DEFC.ZS_delta1 = data.all.lagged$SN.ITK.DEFC.ZS - data.all.lagged$SN.ITK.DEFC.ZS_tm1
+data.all.lagged$SN.ITK.DEFC.ZS_delta2 = data.all.lagged$SN.ITK.DEFC.ZS_tm1 - data.all.lagged$SN.ITK.DEFC.ZS_tm2
+data.all.lagged$SN.ITK.DEFC.ZS_delta3 = data.all.lagged$SN.ITK.DEFC.ZS_tm2 - data.all.lagged$SN.ITK.DEFC.ZS_tm3
+
+model.all.lagged.formula = stability_index_estimate ~ stability_index_estimate_tm1 +
+  SN.ITK.DEFC.ZS_delta1 + SN.ITK.DEFC.ZS_delta2 + SN.ITK.DEFC.ZS_delta3 # SN.ITK.DEFC.ZS_tm1 + SN.ITK.DEFC.ZS
+
+model.all.lagged = lm(model.all.lagged.formula, data=data.all.lagged)
+summary(model.all.lagged)
+
+## AG.PRD.FOOD.XD
+# Lag the stability index estimate.
+data.foodprod.lagged = slide(data.chrono, Var='stability_index_estimate', TimeVar='year',
+                        GroupVar='country', NewVar='stability_index_estimate_tm1',
+                        slideBy=-1, keepInvalid=FALSE, reminder=TRUE)
+# Lag the food production index.
+data.foodprod.lagged = slide(data.foodprod.lagged, Var='AG.PRD.FOOD.XD', TimeVar='year',
+                        GroupVar='country', NewVar='AG.PRD.FOOD.XD_tm1',
+                        slideBy=-1, keepInvalid=FALSE, reminder=TRUE)
+data.foodprod.lagged = slide(data.foodprod.lagged, Var='AG.PRD.FOOD.XD', TimeVar='year',
+                        GroupVar='country', NewVar='AG.PRD.FOOD.XD_tm2',
+                        slideBy=-2, keepInvalid=FALSE, reminder=TRUE)
+data.foodprod.lagged = slide(data.foodprod.lagged, Var='AG.PRD.FOOD.XD', TimeVar='year',
+                        GroupVar='country', NewVar='AG.PRD.FOOD.XD_tm3',
+                        slideBy=-3, keepInvalid=FALSE, reminder=TRUE)
+
+data.foodprod.lagged$SIE_delta1 = data.foodprod.lagged$stability_index_estimate - data.foodprod.lagged$stability_index_estimate_tm1
+data.foodprod.lagged$SIE_delta2 = data.foodprod.lagged$stability_index_estimate_tm1 - data.foodprod.lagged$stability_index_estimate_tm2
+data.foodprod.lagged$SIE_delta3 = data.foodprod.lagged$stability_index_estimate_tm2 - data.foodprod.lagged$stability_index_estimate_tm3
+
+data.foodprod.lagged$AG.PRD.FOOD.XD_delta1 = data.foodprod.lagged$AG.PRD.FOOD.XD - data.foodprod.lagged$AG.PRD.FOOD.XD_tm1
+data.foodprod.lagged$AG.PRD.FOOD.XD_delta2 = data.foodprod.lagged$AG.PRD.FOOD.XD_tm1 - data.foodprod.lagged$AG.PRD.FOOD.XD_tm2
+data.foodprod.lagged$AG.PRD.FOOD.XD_delta3 = data.foodprod.lagged$AG.PRD.FOOD.XD_tm2 - data.foodprod.lagged$AG.PRD.FOOD.XD_tm3
+
+model.foodprod.lagged.formula = stability_index_estimate ~ stability_index_estimate_tm1 +
+  AG.PRD.FOOD.XD_delta1 + AG.PRD.FOOD.XD_delta2 + AG.PRD.FOOD.XD_delta3
+
+model.foodprod.lagged = lm(model.foodprod.lagged.formula, data=data.foodprod.lagged)
+summary(model.foodprod.lagged)
+
+############################# Access to basic drinking water.
+data.basicwater.lagged = slide(data.chrono, Var='stability_index_estimate', TimeVar='year',
+                             GroupVar='country', NewVar='stability_index_estimate_tm1',
+                             slideBy=-1, keepInvalid=FALSE, reminder=TRUE)
+data.basicwater.lagged = slide(data.basicwater.lagged, Var='SH.H2O.BASW.ZS', TimeVar='year',
+                               GroupVar='country', NewVar='SH.H2O.BASW.ZS_tm1',
+                               slideBy=-1, keepInvalid=FALSE, reminder=TRUE)
+data.basicwater.lagged = slide(data.basicwater.lagged, Var='SH.H2O.BASW.ZS', TimeVar='year',
+                               GroupVar='country', NewVar='SH.H2O.BASW.ZS_tm2',
+                               slideBy=-2, keepInvalid=FALSE, reminder=TRUE)
+data.basicwater.lagged = slide(data.basicwater.lagged, Var='SH.H2O.BASW.ZS', TimeVar='year',
+                               GroupVar='country', NewVar='SH.H2O.BASW.ZS_tm3',
+                               slideBy=-3, keepInvalid=FALSE, reminder=TRUE)
+
+data.basicwater.lagged$SH.H2O.BASW.ZS_delta1 = data.basicwater.lagged$SH.H2O.BASW.ZS - data.basicwater.lagged$SH.H2O.BASW.ZS_tm1
+data.basicwater.lagged$SH.H2O.BASW.ZS_delta2 = data.basicwater.lagged$SH.H2O.BASW.ZS_tm1 - data.basicwater.lagged$SH.H2O.BASW.ZS_tm2
+data.basicwater.lagged$SH.H2O.BASW.ZS_delta3 = data.basicwater.lagged$SH.H2O.BASW.ZS_tm2 - data.basicwater.lagged$SH.H2O.BASW.ZS_tm3
+
+model.basicwater.lagged.formula = stability_index_estimate ~ stability_index_estimate_tm1 +
+  SH.H2O.BASW.ZS_delta1 + SH.H2O.BASW.ZS_delta2 + SH.H2O.BASW.ZS_delta3
+
+model.basicwater.lagged = lm(model.basicwater.lagged.formula, data=data.basicwater.lagged)
+summary(model.basicwater.lagged)
+
+############################# Percent undernourishment
+data.undernourished.lagged = slide(data.chrono, Var='stability_index_estimate', TimeVar='year',
+                                   GroupVar='country', NewVar='stability_index_estimate_tm1',
+                                   slideBy=-1, keepInvalid=FALSE, reminder=TRUE)
+data.undernourished.lagged = slide(data.undernourished.lagged, Var='SN.ITK.DEFC.ZS', TimeVar='year',
+                                   GroupVar='country', NewVar='SN.ITK.DEFC.ZS_tm1',
+                                   slideBy=-1, keepInvalid=FALSE, reminder=TRUE)
+data.undernourished.lagged = slide(data.undernourished.lagged, Var='SN.ITK.DEFC.ZS', TimeVar='year',
+                                   GroupVar='country', NewVar='SN.ITK.DEFC.ZS_tm2',
+                                   slideBy=-2, keepInvalid=FALSE, reminder=TRUE)
+data.undernourished.lagged = slide(data.undernourished.lagged, Var='SN.ITK.DEFC.ZS', TimeVar='year',
+                                   GroupVar='country', NewVar='SN.ITK.DEFC.ZS_tm3',
+                                   slideBy=-3, keepInvalid=FALSE, reminder=TRUE)
+
+data.undernourished.lagged$SN.ITK.DEFC.ZS_delta1 = data.undernourished.lagged$SN.ITK.DEFC.ZS - data.undernourished.lagged$SN.ITK.DEFC.ZS_tm1
+data.undernourished.lagged$SN.ITK.DEFC.ZS_delta2 = data.undernourished.lagged$SN.ITK.DEFC.ZS_tm1 - data.undernourished.lagged$SN.ITK.DEFC.ZS_tm2
+data.undernourished.lagged$SN.ITK.DEFC.ZS_delta3 = data.undernourished.lagged$SN.ITK.DEFC.ZS_tm2 - data.undernourished.lagged$SN.ITK.DEFC.ZS_tm3
+
+model.undernourished.lagged.formula = stability_index_estimate ~ stability_index_estimate_tm1 +
+  SN.ITK.DEFC.ZS_delta1 + SN.ITK.DEFC.ZS_delta2 + SN.ITK.DEFC.ZS_delta3
+
+model.undernourished.lagged = lm(model.undernourished.lagged.formula, data=data.undernourished.lagged)
+summary(model.undernourished.lagged)
+
+############################### Kcal deficit
+data.kcaldef.lagged = slide(data.chrono, Var='stability_index_estimate', TimeVar='year',
+                            GroupVar='country', NewVar='stability_index_estimate_tm1',
+                            slideBy=-1, keepInvalid=FALSE, reminder=TRUE)
+data.kcaldef.lagged = slide(data.kcaldef.lagged, Var='SN.ITK.DFCT', TimeVar='year',
+                            GroupVar='country', NewVar='SN.ITK.DFCT_tm1',
+                            slideBy=-1, keepInvalid=FALSE, reminder=TRUE)
+data.kcaldef.lagged = slide(data.kcaldef.lagged, Var='SN.ITK.DFCT', TimeVar='year',
+                            GroupVar='country', NewVar='SN.ITK.DFCT_tm2',
+                            slideBy=-2, keepInvalid=FALSE, reminder=TRUE)
+data.kcaldef.lagged = slide(data.kcaldef.lagged, Var='SN.ITK.DFCT', TimeVar='year',
+                            GroupVar='country', NewVar='SN.ITK.DFCT_tm3',
+                            slideBy=-3, keepInvalid=FALSE, reminder=TRUE)
+
+data.kcaldef.lagged$SN.ITK.DFCT_delta1 = data.kcaldef.lagged$SN.ITK.DFCT - data.kcaldef.lagged$SN.ITK.DFCT_tm1
+data.kcaldef.lagged$SN.ITK.DFCT_delta2 = data.kcaldef.lagged$SN.ITK.DFCT_tm1 - data.kcaldef.lagged$SN.ITK.DFCT_tm2
+data.kcaldef.lagged$SN.ITK.DFCT_delta3 = data.kcaldef.lagged$SN.ITK.DFCT_tm2 - data.kcaldef.lagged$SN.ITK.DFCT_tm3
+
+model.kcaldef.lagged.formula = stability_index_estimate ~ stability_index_estimate_tm1 +
+  SN.ITK.DFCT_delta1 + SN.ITK.DFCT_delta2 + SN.ITK.DFCT_delta3
+
+model.kcaldef.lagged = lm(model.kcaldef.lagged.formula, data=data.kcaldef.lagged)
+summary(model.kcaldef.lagged)
+
+################# Electricity
+data.elec.lagged = slide(data.chrono, Var='stability_index_estimate', TimeVar='year',
+                         GroupVar='country', NewVar='stability_index_estimate_tm1',
+                         slideBy=-1, keepInvalid=FALSE, reminder=TRUE)
+data.elec.lagged = slide(data.elec.lagged, Var='EG.ELC.ACCS.ZS', TimeVar='year',
+                         GroupVar='country', NewVar='EG.ELC.ACCS.ZS_tm1',
+                         slideBy=-1, keepInvalid=FALSE, reminder=TRUE)
+data.elec.lagged = slide(data.elec.lagged, Var='EG.ELC.ACCS.ZS', TimeVar='year',
+                         GroupVar='country', NewVar='EG.ELC.ACCS.ZS_tm2',
+                         slideBy=-2, keepInvalid=FALSE, reminder=TRUE)
+data.elec.lagged = slide(data.elec.lagged, Var='EG.ELC.ACCS.ZS', TimeVar='year',
+                         GroupVar='country', NewVar='EG.ELC.ACCS.ZS_tm3',
+                         slideBy=-3, keepInvalid=FALSE, reminder=TRUE)
+data.elec.lagged = slide(data.elec.lagged, Var='EG.ELC.ACCS.ZS', TimeVar='year',
+                         GroupVar='country', NewVar='EG.ELC.ACCS.ZS_tm4',
+                         slideBy=-4, keepInvalid=FALSE, reminder=TRUE)
+data.elec.lagged = slide(data.elec.lagged, Var='EG.ELC.ACCS.ZS', TimeVar='year',
+                         GroupVar='country', NewVar='EG.ELC.ACCS.ZS_tm5',
+                         slideBy=-5, keepInvalid=FALSE, reminder=TRUE)
+
+data.elec.lagged$EG.ELC.ACCS.ZS_delta1 = data.elec.lagged$EG.ELC.ACCS.ZS - data.elec.lagged$EG.ELC.ACCS.ZS_tm1
+data.elec.lagged$EG.ELC.ACCS.ZS_delta2 = data.elec.lagged$EG.ELC.ACCS.ZS_tm1 - data.elec.lagged$EG.ELC.ACCS.ZS_tm2
+data.elec.lagged$EG.ELC.ACCS.ZS_delta3 = data.elec.lagged$EG.ELC.ACCS.ZS_tm2 - data.elec.lagged$EG.ELC.ACCS.ZS_tm3
+data.elec.lagged$EG.ELC.ACCS.ZS_delta4 = data.elec.lagged$EG.ELC.ACCS.ZS_tm3 - data.elec.lagged$EG.ELC.ACCS.ZS_tm4
+data.elec.lagged$EG.ELC.ACCS.ZS_delta5 = data.elec.lagged$EG.ELC.ACCS.ZS_tm4 - data.elec.lagged$EG.ELC.ACCS.ZS_tm5
+
+model.elec.lagged.formula = stability_index_estimate ~ stability_index_estimate_tm1 +
+  EG.ELC.ACCS.ZS_delta1 + EG.ELC.ACCS.ZS_delta2 + EG.ELC.ACCS.ZS_delta3 +
+  EG.ELC.ACCS.ZS_delta4 + EG.ELC.ACCS.ZS_delta5
+
+model.elec.lagged = lm(model.elec.lagged.formula, data=data.elec.lagged)
+summary(model.elec.lagged)
+
+
