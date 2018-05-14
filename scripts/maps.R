@@ -4,6 +4,7 @@
 # install.packages('openxlsx') # Uncomment this to install the package.
 library('openxlsx')
 library('rworldmap')
+library(magick)
 setwd('C:/Users/aroot/Desktop/Classes/17.835/Project/gitstuff/17.835-finalproject/images/maps/')
 
 
@@ -17,7 +18,7 @@ processed.terror = read.csv(file.path(PROCESSED_DATA_DIR, 'terrorism_incidents.c
 processed.wdi = read.csv(file.path(PROCESSED_DATA_DIR, 'wdi.csv'))
 processed.wgi = read.csv(file.path(PROCESSED_DATA_DIR, 'wgi.csv'))
 
-data.full = read.csv(file.path(FINAL_DATA_DIR, 'data_try.csv'))
+data.full = read.csv(file.path(FINAL_DATA_DIR, 'data_matched_wdi_wgi.csv'))
 
 
 yeared = c(2000, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
@@ -32,12 +33,12 @@ data.vis <- data.frame(matrix(ncol = 0, nrow = nrow(data.full)))
 data.vis$code <- data.full$code
 data.vis$year <- data.full$year
 data.vis$water <- data.full$SH.H2O.BASW.ZS
-data.vis$deficit <- data.full$SN.ITK.DFCT
+data.vis$deficit <- -data.full$SN.ITK.DEFC.ZS
 data.vis$deficitneg <- -data.full$SN.ITK.DFCT
+data.vis$stable <- data.full$stability_index_estimate
 
 n=10
 cmcolors = cm.colors(n, alpha = 1)
-revheatcolors = rev(heatcolors)
 
 heatcolors = heat.colors(n, alpha = 1)
 
@@ -58,25 +59,69 @@ jpeg(name)
 
 par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
 
-
+#mapDevice(device="x11")
 map.params <- mapCountryData(sPDF, nameColumnToPlot='water', catMethod=seq(0, 100, by=5), addLegend='TRUE', missingCountryCol = "grey", 
-                             mapTitle="Percent Access to Drinking Water", oceanCol="lightblue", colourPalette =cmcolors)
+                             mapTitle=paste("Percent Access to Drinking Water", toString(yd), sep=" "), oceanCol="lightblue", colourPalette =heatcolors)
 
 
 
 dev.off()
 
+rough <- image_read(name)
+test <- image_annotate(rough, toString(yd), size = 30, color = "black", degrees = 0, location = "+15+320")
+test <- image_flip(test)
+test <- image_crop(test, "600x400")
+test <- image_flip(test)
 
-name =paste("deficit", toString(yd), ".jpg", sep="")
+print(test)
+
+image_write(test, paste("water", toString(yd), "annot", ".jpg", sep=""))
+
+
+name =paste("undernourished", toString(yd), ".jpg", sep="")
 jpeg(name)
 
 par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
 
 
-map.params <- mapCountryData(sPDF, nameColumnToPlot='deficitneg', catMethod=seq(-600, 0, by=50), addLegend='TRUE', missingCountryCol = "grey", 
-                             mapTitle="Kcal Deficit (Negative)", oceanCol="lightblue", colourPalette =heatcolors)
+map.params <- mapCountryData(sPDF, nameColumnToPlot='deficit', catMethod=seq(-60, 0, by=5), addLegend='TRUE', missingCountryCol = "grey", 
+                             mapTitle = paste("Percent Undernourished", toString(yd), sep=" ") , oceanCol="lightblue", colourPalette =heatcolors)
 
 dev.off()
 
+rough <- image_read(name)
+test <- image_annotate(rough, toString(yd), size = 30, color = "black", degrees = 0, location = "+15+320")
+test <- image_flip(test)
+test <- image_crop(test, "600x400")
+test <- image_flip(test)
+
+print(test)
+
+image_write(test, paste("undernourished", toString(yd), "annot", ".jpg", sep=""))
+
+
+name =paste("stability", toString(yd), ".jpg", sep="")
+jpeg(name)
+
+
+par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
+
+
+map.params <- mapCountryData(sPDF, nameColumnToPlot='stable', catMethod=seq(-3, 2, by=.5), addLegend='TRUE', missingCountryCol = "grey", 
+                             mapTitle=paste("Stability Index Estimate", toString(yd), sep=" "), oceanCol="lightblue", colourPalette =heatcolors)
+
+
+
+dev.off()
+
+rough <- image_read(name)
+test <- image_annotate(rough, toString(yd), size = 30, color = "black", degrees = 0, location = "+15+320")
+test <- image_flip(test)
+test <- image_crop(test, "600x400")
+test <- image_flip(test)
+
+print(test)
+
+image_write(test, paste("stable", toString(yd), "annot", ".jpg", sep=""))
 
 }
