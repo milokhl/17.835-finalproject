@@ -40,4 +40,5 @@ For a description of WDI variables, see ```data/original/wdi_info.csv```.
 For a dataset mapping countries to country codes, see ```data/processed/country_codes.csv```.
 
 ## Scripts
+
 All code used for our analysis is in ```scripts/```.
