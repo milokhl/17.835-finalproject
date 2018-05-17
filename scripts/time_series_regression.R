@@ -3,7 +3,9 @@
 # Milo & Jen
 
 # install.packages('DataCombine')
+install.packages('xtable')
 library(DataCombine)
+library(xtable)
 
 # Use the WDI/WGI matched dataset, since we don't care about global terrorism.
 data = read.csv("../data/final/data_matched_wdi_wgi.csv")
@@ -317,4 +319,50 @@ model.elec.lagged.formula = stability_index_estimate ~ stability_index_estimate_
 model.elec.lagged = lm(model.elec.lagged.formula, data=data.elec.lagged)
 summary(model.elec.lagged)
 
+########################## Distributed lag for all vars
+data.all.lagged = merge(data.basicwater.lagged, data.foodprod.lagged, by=intersect(names(data.basicwater.lagged),
+                        names(data.foodprod.lagged)), all.x = TRUE, all.y = TRUE)
+data.all.lagged = merge(data.all.lagged, data.undernourished.lagged, by=intersect(names(data.basicwater.lagged),
+                        names(data.foodprod.lagged)), all.x = TRUE, all.y = TRUE)
+data.all.lagged = subset(data.all.lagged, select=-c(X))
+
+data.all.lagged = slide(data.all.lagged, Var='stability_index_estimate', TimeVar='year',
+                        GroupVar='country', NewVar='stability_index_estimate_tm2',
+                        slideBy=-2, keepInvalid=FALSE, reminder=TRUE)
+data.all.lagged = slide(data.all.lagged, Var='stability_index_estimate', TimeVar='year',
+                        GroupVar='country', NewVar='stability_index_estimate_tm3',
+                        slideBy=-3, keepInvalid=FALSE, reminder=TRUE)
+
+data.all.lagged$sie_delta1 = data.all.lagged$stability_index_estimate - data.all.lagged$stability_index_estimate_tm1
+data.all.lagged$sie_delta2 = data.all.lagged$stability_index_estimate_tm1 - data.all.lagged$stability_index_estimate_tm2
+data.all.lagged$sie_delta3 = data.all.lagged$stability_index_estimate_tm2 - data.all.lagged$stability_index_estimate_tm3
+
+model.all.lagged.formula = sie_delta1 ~ sie_delta2 + # sie_delta3 +
+  SN.ITK.DEFC.ZS_delta1 + SN.ITK.DEFC.ZS_delta2 + # SN.ITK.DEFC.ZS_delta3 +
+  SH.H2O.BASW.ZS_delta1 + SH.H2O.BASW.ZS_delta2 + # SH.H2O.BASW.ZS_delta3 +
+  AG.PRD.FOOD.XD_delta1 + AG.PRD.FOOD.XD_delta2 # + # AG.PRD.FOOD.XD_delta3
+
+model.all.lagged = lm(model.all.lagged.formula, data=data.all.lagged)
+summary(model.all.lagged)
+  
+table = xtable(model.all.lagged)
+print(table)
+
+# Plot water access
+plot(x = data.all.lagged$SH.H2O.BASW.ZS_delta1, y = data.all.lagged$sie_delta1,
+     cex=0.8, col='blue', xlab='Change in Basic Water Access (D1)',
+     ylab='Change in Stability Index (D1)',
+     main='Change in Stability Index vs. Basic Water Access (1 Year Lag)')
+abline(model.all.lagged$coefficients['(Intercept)'],
+       model.all.lagged$coefficients['SH.H2O.BASW.ZS_delta1'],
+       col='black', lwd=2)
+
+# Plot water access
+plot(x = data.all.lagged$SH.H2O.BASW.ZS_delta2, y = data.all.lagged$sie_delta1,
+     cex=0.8, col='blue', xlab='Change in Basic Water Access (D2)',
+     ylab='Change in Stability Index (D1)',
+     main='Change in Stability Index vs. Basic Water Access (2 Year Lag)')
+abline(model.all.lagged$coefficients['(Intercept)'],
+       model.all.lagged$coefficients['SH.H2O.BASW.ZS_delta2'],
+       col='black', lwd=2)
 
