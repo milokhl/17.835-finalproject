@@ -1,7 +1,7 @@
 # Impact of Food Security on Political Stability
 By AJ Root, Jen McDermott, Talia Blum, and Milo Knowles.
 
-When running ```scripts/process_data.R```, make sure you set the working directory to that of the script!
+The final descriptive analysis, presentation, and poster are located in the ```report/``` folder.
 
 ## Datasets
 - ```data/original/``` contains the raw data sources (a mix of .xlsx and .csv).
@@ -38,3 +38,6 @@ For a description of WDI variables, see ```data/original/wdi_info.csv```.
 - ER.GDP.FWTL.M3.KD = Water productivity, total (constant 2010 US$ GDP per cubic meter of total freshwater withdrawal)
 
 For a dataset mapping countries to country codes, see ```data/processed/country_codes.csv```.
+
+## Scripts
+All code used for our analysis is in ```scripts/```.
